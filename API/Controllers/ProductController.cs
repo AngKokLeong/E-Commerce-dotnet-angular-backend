@@ -28,7 +28,9 @@ namespace API.Controllers
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProduct(int id){
-            return await _productRepository.GetProductByIdAsync(id);
+            var product = await _productRepository.GetProductByIdAsync(id);
+
+            return Ok(product);
         }
     }
 
