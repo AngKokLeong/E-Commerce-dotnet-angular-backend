@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Core.Interfaces;
 using Core.Specifications;
 using API.DTO;
+using AutoMapper;
 
 namespace API.Controllers
 {
@@ -15,9 +16,11 @@ namespace API.Controllers
         private readonly IGenericRepository<Product> _productsRepository;
         private readonly IGenericRepository<ProductBrand> _productBrandRepository;
         private readonly IGenericRepository<ProductType> _productTypeRepository;
+        private readonly IMapper _mapper;
 
-        public ProductsController(IGenericRepository<Product> productsRepository, IGenericRepository<ProductBrand> productBrandRepository, IGenericRepository<ProductType> productTypeRepository)
+        public ProductsController(IGenericRepository<Product> productsRepository, IGenericRepository<ProductBrand> productBrandRepository, IGenericRepository<ProductType> productTypeRepository, IMapper mapper)
         {
+            _mapper = mapper;
             _productsRepository = productsRepository;
             _productBrandRepository = productBrandRepository;
             _productTypeRepository = productTypeRepository;
@@ -29,16 +32,8 @@ namespace API.Controllers
             var specification = new ProductsWithTypesAndBrandsSpecification();
             
             var products = await _productsRepository.ListAsync(specification);
-            
-            return products.Select(product => new ProductToReturnDto {
-                    Id = product.Id,
-                    Name = product.Name,
-                    Description = product.Description,
-                    PictureUrl = product.PictureUrl,
-                    Price = product.Price,
-                    ProductBrand = product.ProductBrand.Name,
-                    ProductType = product.ProductType.Name
-            }).ToList();
+        
+            return _mapper.Map<IReadOnlyList<Product>, List<ProductToReturnDto>>(products);
         }
 
         [HttpGet("{id}")]
@@ -48,16 +43,7 @@ namespace API.Controllers
 
             var product = await _productsRepository.GetEntityWithSpecification(specification);
 
-            return new ProductToReturnDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                PictureUrl = product.PictureUrl,
-                Price = product.Price,
-                ProductBrand = product.ProductBrand.Name,
-                ProductType = product.ProductType.Name
-            };
+            return _mapper.Map<Product, ProductToReturnDto>(product);
         }
 
         [HttpGet("brands")]
