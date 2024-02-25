@@ -24,13 +24,21 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Product>>> GetProducts()
+        public async Task<ActionResult<List<ProductToReturnDto>>> GetProducts()
         {
             var specification = new ProductsWithTypesAndBrandsSpecification();
             
             var products = await _productsRepository.ListAsync(specification);
             
-            return Ok(products);
+            return products.Select(product => new ProductToReturnDto {
+                    Id = product.Id,
+                    Name = product.Name,
+                    Description = product.Description,
+                    PictureUrl = product.PictureUrl,
+                    Price = product.Price,
+                    ProductBrand = product.ProductBrand.Name,
+                    ProductType = product.ProductType.Name
+            }).ToList();
         }
 
         [HttpGet("{id}")]
